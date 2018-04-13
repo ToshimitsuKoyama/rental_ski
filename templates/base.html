@@ -1,0 +1,68 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}">
+
+<head>
+<meta charset="UTF-8">
+<title>{% block title %}電力顧客管理{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+<link href="{% static 'css/bootstrap-theme.min.css' %}" rel="stylesheet">
+<link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui/jquery-ui.min.css' %}">
+<script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script src="{% static 'js/util.js' %}"></script>
+
+{% block extrahead %}{% endblock %}
+
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#gnavi">
+                <span class="sr-only">メニュー</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+
+        <div id="gnavi" class="collapse navbar-collapse">
+            <a href="#" class="navbar-brand">レンタルスキー管理システム</a>
+            <ul class="nav navbar-nav">
+                <li><a href="" class="dropdown-toggle" data-toggle="dropdown">顧客管理<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href={% url 'new_customer' %}>顧客新規登録</a></li>
+                        <li><a href="#">顧客情報修正</a></li>
+                        <li><a href="#">顧客検索</a></li>
+                    </ul>
+                </li>
+                <li><a href="" class="dropdown-toggle" data-toggle="dropdown">予約管理<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">予約登録</a></li>
+                        <li><a href="#">予約修正</a></li>
+                        <li><a href="#">予約検索</a></li>
+                    </ul>
+                </li>
+                <li><a href="" class="dropdown-toggle" data-toggle="dropdown">売上管理<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">売上確認</a></li>
+                        <li><a href="#">Link3-2</a></li>
+                        <li><a href="#">Link3-3</a></li>
+                    </ul>
+                </li>
+                <li><a href="">管理者機能</a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 content-area">
+        {% block content %}
+            {{ content }}
+        {% endblock %}
+    </div><!--/.content-area-->
+</body>
+</html>

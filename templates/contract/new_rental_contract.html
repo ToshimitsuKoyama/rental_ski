@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% load bootstrap4 %}
+{% load static %}
+{% load js %}
+
+{% block extrahead %}
+    <script type="text/javascript">
+        var g_item_summary_list = {{ item_summary_list | js}};
+        var g_customer_number = '{{ customer.customer_number }}'
+    </script>
+    <script type="text/javascript" src="{% static 'js/contract/rental_contract.js' %}"></script>
+
+{% endblock %}
+
+{% block title %}レンタル登録{% endblock %}
+{% block content %}
+    <div class="sticky-top bg-white">
+        <h3 class="border-bottom">レンタル新規登録</h3>
+        <h4>契約者番号:
+            <span id="id_customer_number"> {{ customer.customer_number }} </span>
+            {{ customer.first_name }} {{ customer.second_name }}
+        </h4>
+    </div>
+    <form method="post" class="form-horizontal" name="rental_form" id="id_rental_form">
+        {{ rental_form_set.management_form }}
+
+        {% csrf_token %}
+
+        {% for form in rental_form_set %}
+            {% with user=user_form_set|get_at_index:forloop.counter0 %}
+
+            <div class="card mb-3">
+            <div class="card-header bg-warning">
+                <h5>申し込みカード</h5>
+            </div>
+            <div class="card-body bg-light">
+                <table class="table table-bordered" id="user_info_table_{{ forloop.counter }}">
+                    <tr class="d-flex flex-row">
+                        <th class="bg-primary col-2">
+                            {% bootstrap_label user.user_number.label %}
+                            <span class="badge badge-danger float-right">必須</span></th>
+                        <td class="col-2 border-right-0">
+                            {% bootstrap_field user.user_number show_label=False %}
+                        </td>
+                        <td class="col-2 border-left-0">
+                            <button class="btn btn-primary btn_user_select_modal" id="user-btn{{ forloop.counter }}" data-toggle="modal" data-target="#modal-user-select">登録情報読込</button>
+                        </td>
+                        <td class="col-6 bg-secondary">
+                    </tr>
+                    <tr class="d-flex flex-row">
+                        <th class="bg-primary col-2">利用者氏名<span class="badge badge-danger float-right">必須</span></th>
+                        <td class="col-2">
+                            {% bootstrap_field user.first_name show_label=False %}
+                        </td>
+                        <td class="col-2">
+                            {% bootstrap_field user.second_name show_label=False %}
+                        </td>
+
+                        <th class="bg-primary col-2">利用者シメイ<span class="badge badge-danger float-right">必須</span></th>
+                        <td class="col-2">
+                            {% bootstrap_field user.first_name_kana show_label=False %}
+                        </td>
+                        <td class="col-2">
+                            {% bootstrap_field user.second_name_kana show_label=False %}
+                        </td>
+                    </tr>
+                    <tr class="d-flex flex-row">
+                        <th class="bg-primary col-2">その他情報<span class="badge badge-danger float-right">必須</span></th>
+                        <td class="col-2">
+                            {% bootstrap_field user.age show_label=False  addon_after='<p>歳</p>'%}
+                        </td>
+                        <td class="col-2">
+                            {% bootstrap_field user.height show_label=False addon_after='<p>cm</p>'%}
+                        </td>
+                        <td class="col-2">
+                            {% bootstrap_field user.wight show_label=False addon_after='<p>kg</p>'%}
+                        </td>
+                        <td class="col-2">
+                            {% bootstrap_field user.foot show_label=False addon_after='<p>cm</p>'%}
+                        </td>
+                    </tr>
+                </table>
+                <table class="table table-bordered">
+                    <tr class="d-flex flex-row">
+                        <th class="bg-primary col-2">
+                            {% bootstrap_label form.rental_date.label %}
+                            <span class="badge badge-danger float-right">必須</span>
+                        </th>
+                        <td class="col-2">
+                            {% bootstrap_field form.rental_date show_label=False %}
+                        </td>
+
+                        <th class="bg-primary col-2">
+                            {% bootstrap_label form.rental_start_date.label %}
+                            <span class="badge badge-danger float-right">必須</span>
+                        </th>
+                        <td class="col-2">
+                            {% bootstrap_field form.rental_start_date show_label=False %}
+                        </td>
+                        <th class="bg-primary col-2">
+                            {% bootstrap_label form.rental_end_date.label %}
+                            <span class="badge badge-danger float-right">必須</span>
+                        </th>
+                        <td class="col-2">
+                            {% bootstrap_field form.rental_end_date show_label=False %}
+                        </td>
+                    </tr>
+
+                    <tr class="d-flex flex-row">
+                        <th class="bg-primary col-2">
+                            {% bootstrap_label form.kind.label %}
+                            <span class="badge badge-danger float-right">必須</span>
+                        </th>
+                        <td class="col-2">
+                            {% bootstrap_field form.kind show_label=False %}
+                        </td>
+
+                        <th class="bg-primary col-2">
+                            {% bootstrap_label form.item_summary.label %}
+                            <span class="badge badge-danger float-right">必須</span>
+                        </th>
+                        <td class="col-2">
+                            {% bootstrap_field form.item_summary show_label=False %}
+                        </td>
+
+                        <th class="bg-primary col-2">
+                            {% bootstrap_label form.base_fee.label %}
+                        </th>
+                        <td class="col-2">
+                            {% bootstrap_field form.base_fee show_label=False %}
+                        </td>
+
+                    </tr>
+
+                </table>
+            </div>
+            </div>
+            {% endwith %}
+        {% endfor %}
+
+        <button type="submit">保存</button>
+    <input type="button" value="Add More" id="add_more">
+    </form>
+
+    <!-- モーダル・ダイアログ -->
+        <div class="modal fade" id="modal-user-select" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">利用者リスト</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>利用者番号</th>
+                                <th>お名前</th>
+                            </tr>
+                        </thead>
+                        <tbody id="id_user_list">
+                        <!--リストの中身はモーダル呼び出し時にJS側で作成する -->
+
+                        </tbody>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

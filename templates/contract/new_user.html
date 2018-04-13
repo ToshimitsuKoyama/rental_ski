@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% load bootstrap4 %}
+
+{% block title %}利用者新規登録{% endblock %}
+{% block content %}
+    <h3 class="page-header">利用者新規登録</h3>
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">代表者情報</div>
+            <div class="panel-body form-inline">
+                <div class="input-group">
+                    <span class="input-group-addon">代表者番号</span>
+                    <input type="text" class="form-control" id="InputText" value={{ customer.customer_number }} readonly>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon">代表者名</span>
+                    <input type="text" class="form-control" id="InputText" value=" {{ customer.first_name }} {{ customer.second_name }}" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="form-horizontal">
+        {% csrf_token %}
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">利用者情報</div>
+                <div class="panel-body form-horizontal">
+                    {% for item in form %}
+                        {% if item.name == 'first_name' %}
+                            {% include 'form_2in1_base.html' with label='氏名' item1=form.first_name item2=form.second_name %}
+                        {% elif item.name == 'first_name_kana' %}
+                            {% include 'form_2in1_base.html' with label='氏名(カナ)' item1=form.first_name_kana item2=form.second_name_kana %}
+                        {% elif item.name == 'second_name' or item.name == 'second_name_kana' %}
+                        {% elif item.name == 'memo' %}
+                            {% include 'form_wide_item_base.html' with item=item %}
+                        {% else %}
+                            {% include 'form_base.html' with item=item %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+        <button type="submit">保存</button>
+    </form>
+{% endblock %}
