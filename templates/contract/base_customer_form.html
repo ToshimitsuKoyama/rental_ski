@@ -1,0 +1,47 @@
+{% load bootstrap4 %}
+
+ <table class="table table-bordered">
+        <tr class="d-flex flex-row">
+            <th class="bg-info col-2">
+                {% bootstrap_label form.customer_number.label %}
+                <span class="badge badge-danger float-right">必須</span></th>
+            <td class="col-2 border-right-0">
+                {% bootstrap_field form.customer_number show_label=False %}
+            </td>
+        </tr>
+        <tr class="d-flex flex-row">
+            <th class="bg-info col-2">利用者氏名<span class="badge badge-danger float-right">必須</span></th>
+            <td class="col-2">
+                {% bootstrap_field form.first_name show_label=False %}
+            </td>
+            <td class="col-2">
+                {% bootstrap_field form.second_name show_label=False %}
+            </td>
+
+            <th class="bg-info col-2">利用者シメイ<span class="badge badge-danger float-right">必須</span></th>
+            <td class="col-2">
+                {% bootstrap_field form.first_name_kana show_label=False %}
+            </td>
+            <td class="col-2">
+                {% bootstrap_field form.second_name_kana show_label=False %}
+            </td>
+        </tr>
+        <tr class="d-flex flex-row">
+            <th class="bg-info col-2">郵便番号</th>
+            <td class="col-2">
+                {% bootstrap_field form.zip_code show_label=False %}
+            </td>
+        </tr>
+        <tr class="d-flex flex-row">
+            <th class="bg-info col-2">住所<span class="badge badge-danger float-right">必須</span></th>
+            <td class="col-6">
+                {% bootstrap_field form.address show_label=False %}
+            </td>
+        </tr>
+        <tr class="d-flex flex-row">
+            <th class="bg-info col-2">電話番号<span class="badge badge-danger float-right">必須</span></th>
+            <td class="col-4">
+                {% bootstrap_field form.phone show_label=False %}
+            </td>
+        </tr>
+    </table>
