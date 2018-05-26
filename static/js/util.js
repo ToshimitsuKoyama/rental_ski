@@ -19,22 +19,23 @@ $(function() {
         yearSuffix: "年"
     });
 
-    $('.input_number').focusout(function(){
-        replaceAddCommaNumber($(this))
-    });
-    $('.input_number').focusin(function(){
-         replaceDelCommaNumber($(this))
-
-    });
-    $('.input_number').change(function(){
+    $(document).on('focusout', '.input_number', function(){
         replaceAddCommaNumber($(this))
     });
 
-    $('form').submit(function(){
+    $(document).on('focusin', '.input_number', function(){
+        replaceDelCommaNumber($(this))
+    });
+
+    $(document).on('change', '.input_number', function(){
+        replaceAddCommaNumber($(this))
+    });
+
+    $(document).on('submit', 'form', function(){
         $('.input_number').each(function(){
             replaceDelCommaNumber($(this))
         });
-    })
+    });
 
 });
 
@@ -50,7 +51,7 @@ function getAddCommaNumber(input_obj){
     var input_number=input_obj.val();
     var comma_number=null;
 
-    if(!isNaN(input_number)) {
+    if(!isNaN(input_number) && input_number!=="") {
         comma_number = Number(input_number).toLocaleString();
     }
 

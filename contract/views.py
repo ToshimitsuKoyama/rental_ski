@@ -1,11 +1,13 @@
 from array import array
-
+import collections
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
-from contract.forms import NewContractForm, NewUserForm, NewUserFormSet, NewRentalContractForm,NewRentalContractFormSet
-from contract.models import CustomerInfo, UserInfo, Rental, RentalMenuMaster
-from django.views.generic.edit import FormView,CreateView
+from contract.forms import ContractForm, CustomerForm, NewRentalForm, NewRentalFormSet, CustomerSearchForm
+from contract.models import CustomerInfo, RentalInfo, RentalMenuMaster,ContractInfo
+from django.views.generic.edit import FormView, CreateView, UpdateView, DeletionMixin
+from django.views.generic.list import ListView
+from django.views.generic.detail import SingleObjectMixin
 
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -25,107 +27,156 @@ def sample_view(request):
 class NewCustomerView(CreateView):
     model = CustomerInfo
     template_name = 'contract/new_customer.html'
-    form_class = NewContractForm
+    form_class = CustomerForm
 
     def get_success_url(self):
-        return reverse('new_rental', args=(self.object.customer_number,))
+        return reverse('contract:new_rental', args=[self.object.customer_number])
 
 
-class NewUserView(CreateView):
-    model = UserInfo
-    template_name = 'contract/new_user.html'
-    form_class = NewUserForm
+class EditCustomerView(UpdateView, DeletionMixin):
+    template_name = 'contract/edit_customer.html'
+    form_class = CustomerForm
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        # 代表者番号をテンプレートへ連携
-        number = self.kwargs['customer_number']
-        ctx['customer'] = CustomerInfo.objects.get(customer_number=number)
-
-        # 利用者番号を初期値に格納
-        ctx['form'].initial['user_number']=UserInfo.make_user_number(ctx['customer'].customer_number)
-        return ctx
-
-    def get_success_url(self):
-        return reverse('new_rental', args=(self.object.user_number,))
+    model = CustomerInfo
 
     def post(self, request, *args, **kwargs):
-        self.object = None # BaseCreateViewの記載よりコピー
-        form = NewUserForm(request.POST)
-        if form.is_valid():
-            user_model = form.save(commit=False)
-            user_model.customer = CustomerInfo.objects.get(customer_number=self.kwargs['customer_number'])
+        update_fix_btn_name = "update_fix_btn"
+        delete_fix_btn_name = "delete_fix_btn"
 
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
+        if delete_fix_btn_name in request.POST:
+            return self.delete(request, *args, **kwargs)
+        elif update_fix_btn_name in request.POST:
+            return super().post(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('contract:edit_customer', args=[self.object.id])
+
+    def form_valid(self, form):
+        form.save()
+        success_msg = "お客様情報を更新しました"
+        return self.render_to_response(self.get_context_data(form=form, msg=success_msg))
 
 
-class NewRentalContractView(CreateView):
-    model = Rental
+class NewRentalContractView(FormView):
     template_name = 'contract/new_rental_contract.html'
-    form_class = NewRentalContractForm
+    form_class = ContractForm
 
-    def post(self, request, *args, **kwargs):
-        self.object = None
-        form = NewRentalContractForm(request.POST)
-        if form.is_valid():
-            rental_contract_model = form.save(commit=False)
-            rental_contract_model.user = UserInfo.objects.get(user_number=self.kwargs['user_number'])
+    def get_success_url(self):
+        return reverse('contract:new_customer')
 
-            return self.form_valid(form)
+    def form_valid(self, form):
+        ctx = self.get_context_data()
+        rental_formset = ctx['inline']
+        if rental_formset.is_valid() and form.is_valid():
+            contract_model = form.save(commit=False)
+            contract_model.customer = CustomerInfo.objects.get(customer_number=form.cleaned_data["customer_number"])
+            contract_model.save()
+
+            for rental_form in rental_formset:
+                rental_model = rental_form.save(commit=False)
+                rental_model.contract = contract_model
+                rental_model.save()
+
+            return super().form_valid(form)
+
         else:
-            return self.form_invalid(form)
+            return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
-        # 顧客情報をテンプレートへ連携
-        number = self.kwargs['customer_number']
-        ctx['customer'] = CustomerInfo.objects.get(customer_number=number)
-
-        # 利用者情報のformをテンプレートへ連携
-        ctx['rental_form_set'] = NewRentalContractFormSet(queryset=Rental.objects.none())
-        ctx['user_form_set'] = NewUserFormSet(queryset=UserInfo.objects.none())
+        if self.request.POST:
+            ctx['form'] = ContractForm(self.request.POST)
+            ctx['inline'] = NewRentalFormSet(self.request.POST)
+        else:
+            # 顧客情報をテンプレートへ連携
+            number = self.kwargs['customer_number']
+            customer_info = CustomerInfo.objects.get(customer_number=number)
+            contract_form_init = {
+                "customer_number" : customer_info.customer_number,
+                "customer_name" : customer_info.first_name + customer_info.second_name
+            }
+            ctx['form'] = ContractForm(initial=contract_form_init)
+            ctx['inline'] = NewRentalFormSet(queryset=RentalInfo.objects.none())
 
         # メニューのリストをテンプレートへ連携
-        item_summary_list = RentalMenuMaster.objects.all().values('id','menu_name','base_fee','kind__kind_id')
+        item_summary_list = RentalMenuMaster.objects.all().values()
         ctx['item_summary_list'] = list(item_summary_list)
         return ctx
 
 
-def get_user_list_ajax_api(request):
-    if request.is_ajax():
-        if request.method == 'GET':
-            customer_id = request.GET.get('customer_id')
-            user_list = list(UserInfo.objects.filter(customer__customer_number=customer_id).values('user_number','first_name','second_name'))
+class CustomerSearchView(ListView):
+    KEY_SEARCH_POST = 'search-post'
 
-            d = {
-                'user_list': user_list
-            }
-            return JsonResponse(d)
+    template_name = 'contract/customer_search.html'
+    model = CustomerInfo
+    paginate_by = 5
+
+    def get_queryset(self):
+
+        queryset = []
+        if self.request.session.has_key(self.KEY_SEARCH_POST):
+            queryset = self._get_input_filter_queryset()
+
+        return queryset
+
+    def post(self, request, *args, **kwargs):
+        self.request.session[self.KEY_SEARCH_POST] = self.request.POST
+        return self.get(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        if self._is_search_post_info_del():
+            del self.request.session[self.KEY_SEARCH_POST]
+        return super().get(request, *args, **kwargs)
+
+    def _is_search_post_info_del(self):
+        if self.request.method == 'GET' \
+                and "page" not in self.request.GET \
+                and self.request.session.has_key(self.KEY_SEARCH_POST):
+
+            return True
+        else:
+            return False
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        if self.request.POST:
+            search_form = CustomerSearchForm(self.request.POST)
+        else:
+            search_form = CustomerSearchForm()
+
+        ctx['form'] = search_form
+        return ctx
+
+    def _get_input_filter_queryset(self):
+        search_form = CustomerSearchForm(self.request.session[self.KEY_SEARCH_POST])
+        customer_list = search_form.get_filter_queryset().order_by('customer_number').values()
+
+        queryset = []
+        for customer in customer_list:
+            customer_number = customer["customer_number"]
+            customer.update({"detail_url": self._get_customer_detail_url(customer_number)})
+            contract = ContractInfo.objects.filter(customer__customer_number=[customer_number]).order_by('rental_date').first()
+            if contract:
+                customer.update({"last_date": contract.rental_date})
+
+            queryset.append(customer)
+
+        return queryset
+
+    def _get_customer_detail_url(self, customer_number):
+        return ""
 
 
-def get_user_info_ajax_api(request):
-    if request.is_ajax():
-        if request.method == 'GET':
-            user_number = request.GET.get('user_number')
-            try:
-                user_info = model_to_dict(UserInfo.objects.get(user_number=user_number))
-                d = {
-                    'user_info': user_info
-                }
-                return JsonResponse(d)
+class ContractSearchView(ListView):
+    def get_context_data(self, *, object_list=None, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        if self.request.POST:
+            search_form = CustomerSearchForm(self.request.POST)
+        else:
+            search_form = CustomerSearchForm()
 
-            except MultipleObjectsReturned:
-                print("exception error MultipleObjectsReturned")
-
-            except ObjectDoesNotExist:
-                print("exception error ObjectDoesNotExist")
-
-
-
-
+        ctx['form'] = search_form
+        return ctx
 
 
 

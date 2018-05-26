@@ -1,10 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% load bootstrap4 %}
+
+{% block title %}お客様新規登録{% endblock %}
+{% block content %}
+    <h3 class="page-header border-bottom">お客様検索</h3>
+
+    <div class="col-8 mx-auto">
+    <div class="card shadow">
+        <div class="card-header">顧客検索条件</div>
+        <div class="card-body">
+            <form method="post" class="form-horizontal card-body" action="{% url 'contract:customer_search' %}">
+                {% csrf_token %}
+                <div class="form-inline">
+                    <label class="col-3">顧客番号</label>
+                    <div class="col-3">
+                        {% bootstrap_field form.customer_number show_label=False bound_css_class=''%}
+                    </div>
+                </div>
+                <div class="form-inline mt-1">
+                    <label class="col-3">顧客氏名</label>
+                    <div class="col-3">
+                        {% bootstrap_field form.first_name show_label=False bound_css_class=''%}
+                    </div>
+                    <div class="col-3">
+                        {% bootstrap_field form.second_name show_label=False bound_css_class=''%}
+                    </div>
+                </div>
+                <div class="form-inline mt-1">
+                    <label class="col-3">顧客シメイ</label>
+                    <div class="col-3">
+                        {% bootstrap_field form.first_name_kana show_label=False bound_css_class=''%}
+                    </div>
+                    <div class="col-3">
+                        {% bootstrap_field form.second_name_kana show_label=False bound_css_class=''%}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block shadow mt-5">検索</button>
+            </form>
+        </div>
+    </div>
+    </div>
+
+    <table class="table table-bordered table-hover mt-5">
+        <thead class="bg-primary text-white">
+        <tr>
+            <th>顧客番号</th>
+            <th>氏名</th>
+            <th>シメイ</th>
+            <th>前回利用日</th>
+        </tr>
+        </thead>
+        <tbody class="bg-white">
+        {% for object in object_list %}
+            <tr ><a href = {{ object.detail_url}}>
+                <td><a href = {{ object.detail_url}}>{{ object.customer_number }}</a></td>
+                <td>{{ object.first_name }} {{ object.second_name }}</td>
+                <td>{{ object.first_name_kana }} {{ object.second_name_kana }}</td>
+                <td>{{ object.last_date }}</td>
+
+            </a></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if is_paginated %}
+        <div class="d-flex">
+        <ul class="pagination mx-auto">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1"><<</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><</a></li>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item active">
+                        <a class="page-link" href="?page={{i}}">{{i}}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{i}}">{{i}}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href=?page={{ page_obj.next_page_number }}">></a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">>></a></li>
+            {% endif %}
+        </ul>
+        </div>
+    {% endif %}
+
+{% endblock %}
