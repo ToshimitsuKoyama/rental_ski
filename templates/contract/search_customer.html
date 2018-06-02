@@ -2,15 +2,15 @@
 
 {% load bootstrap4 %}
 
-{% block title %}お客様新規登録{% endblock %}
+{% block title %}顧客検索{% endblock %}
 {% block content %}
-    <h3 class="page-header border-bottom">お客様検索</h3>
+    <h3 class="page-header border-bottom">顧客検索</h3>
 
     <div class="col-8 mx-auto">
     <div class="card shadow">
         <div class="card-header">顧客検索条件</div>
         <div class="card-body">
-            <form method="post" class="form-horizontal card-body" action="{% url 'contract:customer_search' %}">
+            <form method="post" class="form-horizontal card-body" action="{% url 'contract:search_customer' %}">
                 {% csrf_token %}
                 <div class="form-inline">
                     <label class="col-3">顧客番号</label>
@@ -54,7 +54,7 @@
         <tbody class="bg-white">
         {% for object in object_list %}
             <tr ><a href = {{ object.detail_url}}>
-                <td><a href = {{ object.detail_url}}>{{ object.customer_number }}</a></td>
+                <td><a href = {% url "contract:edit_customer" object.id %}>{{ object.customer_number }}</a></td>
                 <td>{{ object.first_name }} {{ object.second_name }}</td>
                 <td>{{ object.first_name_kana }} {{ object.second_name_kana }}</td>
                 <td>{{ object.last_date }}</td>

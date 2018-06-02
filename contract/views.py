@@ -2,8 +2,10 @@ from array import array
 import collections
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+from django.views.generic import TemplateView
 
-from contract.forms import ContractForm, CustomerForm, NewRentalForm, NewRentalFormSet, CustomerSearchForm
+from contract.forms import ContractForm, CustomerForm, RentalInfoForm, NewRentalFormSet, CustomerSearchForm, \
+    RentalSearchForm, EditRentalFormSet
 from contract.models import CustomerInfo, RentalInfo, RentalMenuMaster,ContractInfo
 from django.views.generic.edit import FormView, CreateView, UpdateView, DeletionMixin
 from django.views.generic.list import ListView
@@ -15,6 +17,7 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist,MultipleObjectsReturned
 
 from django.forms.models import model_to_dict
+from contract.utility import ModelSearchViewBase
 
 # Create your views here.
 
@@ -58,8 +61,16 @@ class EditCustomerView(UpdateView, DeletionMixin):
 
 
 class NewRentalContractView(FormView):
-    template_name = 'contract/new_rental_contract.html'
+    template_name = 'contract/rental_contract_form.html'
     form_class = ContractForm
+
+    customer_object = None
+    pk_url_kwarg = 'pk'
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get(self.pk_url_kwarg)
+        self.customer_object = CustomerInfo.objects.get(pk=pk)
+        return super().get(request, args, kwargs)
 
     def get_success_url(self):
         return reverse('contract:new_customer')
@@ -69,7 +80,7 @@ class NewRentalContractView(FormView):
         rental_formset = ctx['inline']
         if rental_formset.is_valid() and form.is_valid():
             contract_model = form.save(commit=False)
-            contract_model.customer = CustomerInfo.objects.get(customer_number=form.cleaned_data["customer_number"])
+            contract_model.customer = self.customer_object
             contract_model.save()
 
             for rental_form in rental_formset:
@@ -89,72 +100,66 @@ class NewRentalContractView(FormView):
             ctx['inline'] = NewRentalFormSet(self.request.POST)
         else:
             # 顧客情報をテンプレートへ連携
-            number = self.kwargs['customer_number']
-            customer_info = CustomerInfo.objects.get(customer_number=number)
             contract_form_init = {
-                "customer_number" : customer_info.customer_number,
-                "customer_name" : customer_info.first_name + customer_info.second_name
+                "customer_number" : self.customer_object.customer_number,
+                "customer_name" : self.customer_object.first_name + self.customer_object.second_name
             }
             ctx['form'] = ContractForm(initial=contract_form_init)
             ctx['inline'] = NewRentalFormSet(queryset=RentalInfo.objects.none())
 
         # メニューのリストをテンプレートへ連携
-        item_summary_list = RentalMenuMaster.objects.all().values()
-        ctx['item_summary_list'] = list(item_summary_list)
+        menu_list = RentalMenuMaster.objects.all().values()
+        ctx['rental_menu_list'] = list(menu_list)
         return ctx
 
 
-class CustomerSearchView(ListView):
-    KEY_SEARCH_POST = 'search-post'
+class EditRentalContractView(FormView):
+    template_name = 'contract/rental_contract_form.html'
+    form_class = ContractForm
 
-    template_name = 'contract/customer_search.html'
-    model = CustomerInfo
-    paginate_by = 5
-
-    def get_queryset(self):
-
-        queryset = []
-        if self.request.session.has_key(self.KEY_SEARCH_POST):
-            queryset = self._get_input_filter_queryset()
-
-        return queryset
-
-    def post(self, request, *args, **kwargs):
-        self.request.session[self.KEY_SEARCH_POST] = self.request.POST
-        return self.get(request, *args, **kwargs)
+    rental_contract_object = None
+    rental_info_query_set = None
+    pk_url_kwarg = 'pk'
 
     def get(self, request, *args, **kwargs):
-        if self._is_search_post_info_del():
-            del self.request.session[self.KEY_SEARCH_POST]
-        return super().get(request, *args, **kwargs)
+        pk = kwargs.get(self.pk_url_kwarg)
 
-    def _is_search_post_info_del(self):
-        if self.request.method == 'GET' \
-                and "page" not in self.request.GET \
-                and self.request.session.has_key(self.KEY_SEARCH_POST):
+        self.rental_contract_object = ContractInfo.objects.get(pk=pk)
+        self.rental_info_query_set = RentalInfo.objects.filter(contract=self.rental_contract_object)
 
-            return True
-        else:
-            return False
+        return super().get(request, args, kwargs)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         if self.request.POST:
-            search_form = CustomerSearchForm(self.request.POST)
+            ctx['form'] = ContractForm(self.request.POST)
+            ctx['inline'] = EditRentalFormSet(self.request.POST)
         else:
-            search_form = CustomerSearchForm()
+            contract_form_init = {
+                "customer_number" : self.rental_contract_object.customer.customer_number,
+                "customer_name" : self.rental_contract_object.customer.first_name + self.rental_contract_object.customer.second_name
+            }
+            ctx['form'] = ContractForm(initial=contract_form_init, instance= self.rental_contract_object)
+            ctx['inline'] = EditRentalFormSet(queryset=self.rental_info_query_set)
 
-        ctx['form'] = search_form
+        # メニューのリストをテンプレートへ連携
+        menu_list = RentalMenuMaster.objects.all().values()
+        ctx['rental_menu_list'] = list(menu_list)
         return ctx
 
+
+class CustomerSearchView(ModelSearchViewBase):
+
+    template_name = 'contract/search_customer.html'
+    model = CustomerInfo
+    form_class = CustomerSearchForm
+
     def _get_input_filter_queryset(self):
-        search_form = CustomerSearchForm(self.request.session[self.KEY_SEARCH_POST])
-        customer_list = search_form.get_filter_queryset().order_by('customer_number').values()
+        customer_list = super()._get_input_filter_queryset().values()
 
         queryset = []
         for customer in customer_list:
             customer_number = customer["customer_number"]
-            customer.update({"detail_url": self._get_customer_detail_url(customer_number)})
             contract = ContractInfo.objects.filter(customer__customer_number=[customer_number]).order_by('rental_date').first()
             if contract:
                 customer.update({"last_date": contract.rental_date})
@@ -164,19 +169,26 @@ class CustomerSearchView(ListView):
         return queryset
 
     def _get_customer_detail_url(self, customer_number):
-        return ""
+        return reverse('contract:edit_customer', args=[customer_number])
 
 
-class ContractSearchView(ListView):
-    def get_context_data(self, *, object_list=None, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        if self.request.POST:
-            search_form = CustomerSearchForm(self.request.POST)
-        else:
-            search_form = CustomerSearchForm()
+class RentalInfoSearchView(ModelSearchViewBase):
 
-        ctx['form'] = search_form
-        return ctx
+    template_name = 'contract/search_rental.html'
+    model = RentalInfo
+    form_class = RentalSearchForm
+
+
+class NewRentalTopView(TemplateView):
+    template_name = 'contract/new_rental_top.html'
+
+
+
+
+
+
+
+
 
 
 

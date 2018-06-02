@@ -32,6 +32,16 @@ class ContractInfo(models.Model):
     total_fee = models.IntegerField('割引後金額')
 
 
+class RentalMenuMaster(models.Model):
+    kind_id = models.CharField('レンタル種目ID',max_length=2)
+    kind_name = models.CharField('レンタル種目名', max_length=10)
+    menu_name = models.CharField('レンタルセット内容',max_length=20)
+    base_fee = models.IntegerField('基本金額')
+
+    def __str__(self):
+        return self.kind_name + "-" + self.menu_name
+
+
 class RentalInfo(models.Model):
     contract = models.ForeignKey(ContractInfo, on_delete=models.PROTECT)
     user_number = models.CharField('利用者番号', validators=[RegexValidator('[A-Z]{1}\d{6}')], max_length=7)
@@ -45,12 +55,14 @@ class RentalInfo(models.Model):
     foot = models.CharField('足サイズ', max_length=4,blank=True)
     rental_start_date = models.DateField('レンタル開始日')
     rental_end_date = models.DateField('レンタル終了日', null=True, blank=True)
-    kind = models.CharField('レンタル種目', max_length=10)
-    item_summary = models.CharField('レンタルセット内容', max_length=20)
+    rental_menu = models.ForeignKey(RentalMenuMaster, on_delete=models.PROTECT)
     base_fee = models.IntegerField('基本料金')
     discount = models.IntegerField('割引金額', null=True, blank=True)
     subtotal_fee = models.IntegerField('小計')
     memo = models.TextField('備考', max_length=50, blank=True)
+
+    def get_item_summary_display(self):
+        return RentalMenuMaster.objects.filter(kind_id=self.item)
 
 
 class RentalItem(models.Model):
@@ -59,12 +71,5 @@ class RentalItem(models.Model):
     item_id = models.CharField('レンタル品ID', max_length=10, blank=True)
 
 
-class RentalMenuMaster(models.Model):
-    kind_id = models.CharField('レンタル種目ID',max_length=2)
-    kind_name = models.CharField('レンタル種目名', max_length=10)
-    menu_name = models.CharField('レンタルセット内容',max_length=20)
-    base_fee = models.IntegerField('基本金額')
 
-    def __str__(self):
-        return self.menu_name
 

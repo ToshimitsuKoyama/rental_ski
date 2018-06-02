@@ -1,14 +1,14 @@
 
 $(function(){
-    $(document).on('change', '[id$=item_summary]',function() {
+    $(document).on('change', '[id$=rental_menu]',function() {
         // 選択したメニューの基本金額を自動入力する
         var menu_id = $(this).val();
         var target_menu;
-        for(var index=0; index<g_item_summary_list.length;index++)
+        for(var index=0; index<g_rental_menu_list.length;index++)
         {
-            if(g_item_summary_list[index].id == menu_id)
+            if(g_rental_menu_list[index].id === menu_id)
             {
-                target_menu = g_item_summary_list[index];
+                target_menu = g_rental_menu_list[index];
             }
         }
 

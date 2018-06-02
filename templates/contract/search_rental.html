@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% load bootstrap4 %}
+
+{% block title %}レンタル契約検索{% endblock %}
+{% block content %}
+    <h3 class="page-header border-bottom">レンタル契約検索</h3>
+
+    <div class="col-8 mx-auto">
+    <div class="card shadow">
+        <div class="card-header">レンタル検索条件</div>
+        <div class="card-body">
+            <form method="post" class="form-horizontal card-body" action="{% url 'contract:search_rental' %}">
+                {% csrf_token %}
+                <div class="form-inline">
+                    <label class="col-3">顧客番号</label>
+                    <div class="col-3">
+                        {% bootstrap_field form.contract__customer__customer_number show_label=False bound_css_class=''%}
+                    </div>
+                </div>
+                <div class="form-inline mt-1">
+                    <label class="col-3">顧客氏名</label>
+                    <div class="col-3">
+                        {% bootstrap_field form.contract__customer__first_name show_label=False bound_css_class=''%}
+                    </div>
+                    <div class="col-3">
+                        {% bootstrap_field form.contract__customer__second_name show_label=False bound_css_class=''%}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block shadow mt-5">検索</button>
+            </form>
+        </div>
+    </div>
+    </div>
+
+    <table class="table table-bordered table-hover mt-5">
+        <thead class="bg-primary text-white">
+        <tr>
+            <th>顧客番号</th>
+            <th>顧客氏名</th>
+            <th>レンタル日</th>
+            <th>利用者氏名</th>
+            <th>利用セットメニュー</th>
+        </tr>
+        </thead>
+        <tbody class="bg-white">
+        {% for object in object_list %}
+            <tr >
+                <td><a href = {% url "contract:edit_customer" object.contract.customer.id %}>
+                    {{ object.contract.customer.customer_number }}
+                </a></td>
+                <td>{{ object.contract.customer.first_name }} {{ object.contract.customer.second_name }}</td>
+                <td><a href = {% url "contract:edit_rental" object.contract.id %}>
+                    {{ object.contract.rental_date }}
+                </a></td>
+                <td>{{ object.first_name }} {{ object.second_name }}</td>
+                <td>{{ object.rental_menu }}</td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if is_paginated %}
+        <div class="d-flex">
+        <ul class="pagination mx-auto">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1"><<</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><</a></li>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item active">
+                        <a class="page-link" href="?page={{i}}">{{i}}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{i}}">{{i}}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">></a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">>></a></li>
+            {% endif %}
+        </ul>
+        </div>
+    {% endif %}
+{% endblock %}
