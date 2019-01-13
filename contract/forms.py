@@ -15,13 +15,23 @@ class CustomerForm(forms.ModelForm):
                   'address', 'phone']
 
 
-class ContractForm(forms.ModelForm):
-    customer_number = forms.CharField(label='顧客番号',
-                                      widget=forms.TextInput(attrs={'readonly': 'readonly'})
-                                      )
+class DetailCustomerForm(CustomerForm):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].disabled = True
+
+
+class ContractForm(forms.ModelForm):
+    # customer_number = forms.CharField(label='顧客番号',
+    #                                   widget=forms.TextInput(attrs={'readonly': 'readonly'})
+    #                                   )
+    customer_number = forms.CharField(label='顧客番号',
+                                      disabled=True
+                                      )
     customer_name = forms.CharField(label='顧客名',
-                                    widget=forms.TextInput(attrs={'readonly': 'readonly'})
+                                    disabled=True
                                     )
 
     rental_date = forms.DateField(label='レンタル日', input_formats=('%Y/%m/%d',),
@@ -86,18 +96,21 @@ class CustomerSearchForm(ModelSearchFormBase):
 
     model_cls = CustomerInfo
 
-    customer_number = forms.CharField(label='顧客番号', required=False)
-    first_name = forms.CharField(label='顧客名（姓）',required=False)
-    second_name = forms.CharField(label='顧客名（名）',required=False)
-    first_name_kana = forms.CharField(label='顧客名（セイ）',required=False)
-    second_name_kana = forms.CharField(label='顧客名（メイ）',required=False)
+    customer_number = forms.CharField(label='代表者番号', required=False)
+    first_name = forms.CharField(label='氏名',required=False,
+                                 widget = forms.TextInput(
+                                     attrs={'placeholder': '白根'})
+                                 )
+    second_name = forms.CharField(label='　',required=False)
+    first_name_kana = forms.CharField(label='シメイ',required=False)
+    second_name_kana = forms.CharField(label='　',required=False)
 
 
 class RentalSearchForm(ModelSearchFormBase):
     model_cls = RentalInfo
 
     rental_start_date = forms.DateField(label='レンタル日付', required=False)
-    contract__customer__customer_number = forms.CharField(label='顧客番号', required=False)
+    contract__customer__customer_number = forms.CharField(label='代表者番号', required=False)
     contract__customer__first_name = forms.CharField(label='顧客名（姓）',required=False)
     contract__customer__second_name = forms.CharField(label='顧客名（名）',required=False)
 

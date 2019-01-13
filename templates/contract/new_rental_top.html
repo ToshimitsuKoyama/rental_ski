@@ -7,9 +7,9 @@
     <h3 class="page-header border-bottom">新規レンタル</h3>
 
     <form method="get" class="mt-5 col-8 mx-auto">
-        <button class="btn-lg btn-primary col-3" formaction={% url 'contract:new_customer' %}>新規顧客のレンタル</button>
-        <button class="ml-3 btn-lg btn-primary col-3" formaction={% url 'contract:search_rental' %}>既存顧客のレンタル</button>
-        <button class="ml-3 btn-lg btn-primary col-3" >予約顧客のレンタル</button>
+        <button class="btn-lg btn-primary col-3" formaction={% url 'contract:new_customer' %}>新規顧客<br>レンタル</button>
+        <button class="ml-3 btn-lg btn-primary col-3" formaction={% url 'contract:search_customer' %}>既存顧客<br>レンタル</button>
+        <button class="ml-3 btn-lg btn-primary col-3" >予約顧客<br>レンタル</button>
     </form>
 
 {% endblock %}

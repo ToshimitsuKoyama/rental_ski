@@ -2,3 +2,14 @@ body {
 padding-top: 70px;
 background-color: mintcream;
 }
+
+.label_req {
+    color: #003eff;
+}
+
+.sticky-sidebar {
+    display: flex;
+    position:-webkit-sticky;
+    position:sticky;
+    top:60px;
+}

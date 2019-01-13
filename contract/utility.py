@@ -23,6 +23,7 @@ class ModelSearchFormBase(forms.Form):
         search_filter = self.get_filter_dict()
         a = self.model_cls.objects.select_related().filter(**search_filter)
         return a
+
     def get_filter_dict(self):
         filter_dict = {}
         for field in self.fields:
@@ -33,52 +34,23 @@ class ModelSearchFormBase(forms.Form):
 
 
 class ModelSearchViewBase(ListView):
-    KEY_SEARCH_POST = 'search-post'
-
     template_name = None
     model = None
     form_class = None
     paginate_by = 5
 
     def get_queryset(self):
-
-        queryset = []
-        if self.request.session.has_key(self.KEY_SEARCH_POST):
-            queryset = self._get_input_filter_queryset()
-
-        return queryset
-
-    def post(self, request, *args, **kwargs):
-        self.request.session[self.KEY_SEARCH_POST] = self.request.POST
-        return self.get(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        if self._is_search_post_info_del():
-            del self.request.session[self.KEY_SEARCH_POST]
-        return super().get(request, *args, **kwargs)
-
-    def _is_search_post_info_del(self):
-        if self.request.method == 'GET' \
-                and "page" not in self.request.GET \
-                and self.request.session.has_key(self.KEY_SEARCH_POST):
-
-            return True
-        else:
-            return False
+        search_form = self.form_class(self.request.GET)
+        return search_form.get_filter_queryset()
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        if self.request.POST:
-            search_form = self.form_class(self.request.POST)
-        else:
-            search_form = self.form_class()
+        ctx['form'] = self.form_class(self.request.GET)
+        ctx['query_url'] = self.request.GET.urlencode()
 
-        ctx['form'] = search_form
         return ctx
 
-    def _get_input_filter_queryset(self):
-        search_form = self.form_class(self.request.session[self.KEY_SEARCH_POST])
-        return search_form.get_filter_queryset()
+
 
 
 

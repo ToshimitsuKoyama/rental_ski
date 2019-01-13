@@ -16,67 +16,40 @@
 
 {% endblock %}
 
-{% block title %}レンタル登録{% endblock %}
+{% block title %}レンタル新規登録{% endblock %}
+{% block header %}レンタル新規登録{% endblock %}
 {% block content %}
-    <h3 class="border-bottom">レンタル新規登録</h3>
-    <form method="post" class="form-horizontal mb-3" name="rental_form">
-        {% csrf_token %}
-        <div class="sticky-top bg-white">
-
-            <table class="table table-bordered">
-                <tr class="d-flex flex-row">
-                    <th class="bg-warning col-2">
-                        {% bootstrap_label form.customer_number.label %}
-                    </th>
-                    <td class="col-2 border-right-0">
-                        {% bootstrap_field form.customer_number show_label=False %}
-                    </td>
-                    <th class="bg-warning col-2">代表者氏名</th>
-                    <td class="col-2 border-right-0">
-                        {% bootstrap_field form.customer_name show_label=False %}
-                    </td>
-                    <th class="bg-warning col-2">
-                        {% bootstrap_label form.rental_date.label %}
-                        <span class="badge badge-danger float-right">必須</span>
-                    </th>
-                    <td class="col-2">
-                        {% bootstrap_field form.rental_date show_label=False %}
-                    </td>
-                </tr>
-                <tr class="d-flex flex-row">
-                    <th class="bg-warning col-2">
-                        {% bootstrap_label form.all_fee.label %}
-                        <span class="badge badge-danger float-right">必須</span>
-                    </th>
-                    <td class="col-2">
-                        {% bootstrap_field form.all_fee show_label=False addon_after='<input type="button" class="btn btn-secondary" value="計算" id="id_fee_sum">' %}
-                    </td>
-                    <th class="bg-warning col-2">
-                        {% bootstrap_label form.all_discount.label %}
-                    </th>
-                    <td class="col-2">
-                        {% bootstrap_field form.all_discount show_label=False %}
-                    </td>
-                    <th class="bg-warning col-2">
-                        {% bootstrap_label form.total_fee.label %}
-                        <span class="badge badge-danger float-right">必須</span>
-                    </th>
-                    <td class="col-2">
-                        {% bootstrap_field form.total_fee show_label=False %}
-                    </td>
-                </tr>
-            </table>
+    <div class="d-flex flex-row">
+        <div class="col-3">
+        <div class="card sticky-sidebar">
+            <div class="card-header bg-warning">
+                代表者情報
+            </div>
+            <div class="card-body">
+                <form method="post" class="form-horizontal" name="customer_form">
+                    {% csrf_token %}
+                    {% bootstrap_field form.customer_number %}
+                    {% bootstrap_field form.customer_name %}
+                    {% bootstrap_field form.all_fee %}
+                    {% bootstrap_field form.all_discount %}
+                    {% bootstrap_field form.total_fee %}
+                </form>
+            </div>
         </div>
-        {{ inline.management_form }}
-        <div id="id_rental_form">
-            {% for item in inline %}
-                {% include 'contract/base_rental_empty_form.html' with form=item %}
-            {% endfor %}
         </div>
-        <button type="button" class="btn btn-primary float-right" id="add_more">申込カード追加</button>
-        <button type="submit" class="btn btn-primary col-7 d-block mx-auto">保存</button>
+        <form method="post" class="form-horizontal col-9" name="rental_form">
 
-    </form>
+            {{ inline.management_form }}
+            <div id="id_rental_form">
+                {% for item in inline %}
+                    {% include 'contract/base_rental_empty_form.html' with form=item number=forloop.counter %}
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-primary float-right" id="add_more">申込カード追加</button>
+            <button type="submit" class="btn btn-primary col-7 d-block mx-auto">保存</button>
+        </form>
+    </div>
+
 
 {% endblock %}
 

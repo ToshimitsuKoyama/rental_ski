@@ -3,24 +3,19 @@
 {% load bootstrap4 %}
 
 {% block title %}お客様情報編集登録{% endblock %}
+{% block header %}お客様情報更新{% endblock %}
 {% block content %}
-    <h3 class="page-header">お客様情報更新</h3>
     <h5 class="text-danger">{{ msg }}</h5>
     <form method="post" class="form-horizontal">
         {% csrf_token %}
-        <div class="card mb-3">
-            <div class="card-header">
-                <h3>契約者情報</h3>
-            </div>
-            <div class="card-body bg-light">
-                {% include 'contract/base_customer_form.html' with form=form %}
 
-                <button type="button" name="update_btn" class="btn btn-primary col-2"
-                data-toggle="modal" data-target="#update_comfirm_modal">更新</button>
-                <button type="button" name="delete_btn" class="btn btn-danger offset-1"
-                data-toggle="modal" data-target="#delete_comfirm_modal">削除</button>
-            </div>
-        </div>
+        {% include 'contract/base_customer_form.html' with form=form %}
+
+        <button type="button" name="update_btn" class="btn btn-primary col-2"
+        data-toggle="modal" data-target="#update_comfirm_modal">更新</button>
+        <button type="button" name="delete_btn" class="btn btn-danger offset-1"
+        data-toggle="modal" data-target="#delete_comfirm_modal">削除</button>
+
         <!-- モーダル・ダイアログ -->
         {% with update_msg="お客様情報を更新します。よろしければ「はい」を押してください" %}
             {% include 'contract/base_modal_comfirm.html' with modal_id="update_comfirm_modal" fix_btn_name="update_fix_btn" message=update_msg %}

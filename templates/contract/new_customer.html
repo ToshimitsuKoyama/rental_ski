@@ -3,19 +3,12 @@
 {% load bootstrap4 %}
 
 {% block title %}お客様新規登録{% endblock %}
+
+{% block header %}お客様新規登録{% endblock %}
 {% block content %}
-    <h3 class="page-header">お客様新規登録</h3>
     <form method="post" class="form-horizontal">
         {% csrf_token %}
-        <div class="card mb-3">
-            <div class="card-header">
-                <h3>契約者情報</h3>
-            </div>
-            <div class="card-body bg-light">
-                {% include 'contract/base_customer_form.html' with form=form %}
-
-                <button type="submit" class="btn btn-primary">保存</button>
-            </div>
-        </div>
+        {% include 'contract/base_customer_form.html' with form=form %}
+        <button type="submit" class="btn btn-primary">保存</button>
     </form>
 {% endblock %}

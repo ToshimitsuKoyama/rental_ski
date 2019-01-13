@@ -1,0 +1,42 @@
+<nav class="navbar navbar-expand-lg navbar-light border-bottom shadow-sm fixed-top" style="background-color: #e3f2fd;">
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#gnavi" aria-label="メニュー">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+    <div id="gnavi" class="collapse navbar-collapse">
+        <a href="#" class="navbar-brand">レンタルスキー管理システム</a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item dropdown"><a href="" class="nav-link dropdown-toggle" data-toggle="dropdown">レンタル情報管理</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href={% url 'contract:new_rental_top' %}>レンタル新規登録</a>
+                    <a class="dropdown-item" href="#">レンタル情報修正</a>
+                    <a class="dropdown-item" href={% url 'contract:search_rental' %}>レンタル情報検索</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown"><a href="" class="nav-link dropdown-toggle" data-toggle="dropdown">顧客管理</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href={% url 'contract:new_customer' %}>顧客新規登録</a>
+                    <a class="dropdown-item" href="#">顧客情報修正</a>
+                    <a class="dropdown-item" href={% url 'contract:search_customer' %}>顧客検索</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown"><a href="" class="nav-link dropdown-toggle" data-toggle="dropdown">予約管理</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">予約登録</a>
+                    <a class="dropdown-item" href="#">予約修正</a>
+                    <a class="dropdown-item" href="#">予約検索</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown"><a href="" class="nav-link dropdown-toggle" data-toggle="dropdown">売上管理</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">売上確認</a>
+                    <a class="dropdown-item" href="#">Link3-2</a>
+                    <a class="dropdown-item" href="#">Link3-3</a>
+                </div>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="#">管理者機能</a></li>
+            <li class="nav-item"><a class="nav-link" href={% url 'logout' %}>ログアウト</a></li>
+        </ul>
+
+    </div>
+</nav>
