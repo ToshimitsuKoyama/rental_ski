@@ -15,7 +15,7 @@ class CustomerForm(forms.ModelForm):
                   'address', 'phone']
 
 
-class DetailCustomerForm(CustomerForm):
+class CustomerReadOnlyForm(CustomerForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -2,15 +2,13 @@
 
 {% load bootstrap4 %}
 
-{% block title %}お客様情報編集登録{% endblock %}
-{% block header %}お客様情報更新{% endblock %}
+{% block title %}お客様情報参照{% endblock %}
+{% block header %}お客様情報参照{% endblock %}
 {% block content %}
-    <form method="post" class="form-horizontal">
-        {% csrf_token %}
+    <form method="get">
 
         {% include 'contract/base_customer_form.html' with form=form %}
 
-        <button type="button" name="update_btn" class="btn btn-primary col-2"
-        data-toggle="modal" data-target="#update_comfirm_modal">更新</button>
+        <button class="btn btn-primary col-2" formaction={{ next_url }}>新規レンタル</button>
     </form>
 {% endblock %}

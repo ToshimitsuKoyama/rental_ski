@@ -10,8 +10,7 @@
             <div class="card sticky-sidebar">
                 <div class="card-header">代表者検索条件</div>
                 <div class="card-body">
-                    <form method="get" action="{% url 'contract:search_customer' %}">
-
+                    <form method="get">
                         <div class="d-flex flex-row">
                             {% bootstrap_field form.customer_number %}
                         </div>

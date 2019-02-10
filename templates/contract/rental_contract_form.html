@@ -10,7 +10,7 @@
 
     </script>
     <script type="text/html" id="empty_form">
-        {% include 'contract/base_rental_empty_form.html' with form=inline.empty_form %}
+        {% include 'contract/base_rental_empty_form.html' with form=inline.empty_form prefix='__prefix__'%}
     </script>
     <script type="text/javascript" src="{% static 'js/contract/rental_contract.js' %}"></script>
 
@@ -42,7 +42,7 @@
             {{ inline.management_form }}
             <div id="id_rental_form">
                 {% for item in inline %}
-                    {% include 'contract/base_rental_empty_form.html' with form=item number=forloop.counter %}
+                    {% include 'contract/base_rental_empty_form.html' with form=item prefix=forloop.counter0 %}
                 {% endfor %}
             </div>
             <button type="button" class="btn btn-primary float-right" id="add_more">申込カード追加</button>

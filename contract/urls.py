@@ -2,7 +2,7 @@
 from django.urls import include, path
 from django.views.generic.base import TemplateView
 from .views import sample_view, NewCustomerView, NewRentalContractView, CustomerSearchView, EditCustomerView, \
-    RentalInfoSearchView, EditRentalContractView, NewRentalTopView, DetailCustomerView
+    RentalInfoSearchView, EditRentalContractView, NewRentalTopView, DetailCustomerForNewRentalView, CustomerSearchForNewRentalView
 
 app_name = "contract"
 
@@ -14,5 +14,6 @@ urlpatterns = [
     path('search_rental/',RentalInfoSearchView.as_view(), name='search_rental'),
     path('edit_rental/<int:contract_id>', EditRentalContractView.as_view(), name="edit_rental"),
     path('new_rental_top/', NewRentalTopView.as_view(), name="new_rental_top"),
-    path('detail_customer/<slug:customer_number>', DetailCustomerView.as_view(), name='detail_customer')
+    path('detail_customer/<slug:customer_number>', DetailCustomerForNewRentalView.as_view(), name='detail_customer'),
+    path('search_rental_for_new_rental/', CustomerSearchForNewRentalView.as_view(), name='search_rental_for_new_rental'),
 ]

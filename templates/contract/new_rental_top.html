@@ -8,7 +8,7 @@
 
     <form method="get" class="mt-5 col-8 mx-auto">
         <button class="btn-lg btn-primary col-3" formaction={% url 'contract:new_customer' %}>新規顧客<br>レンタル</button>
-        <button class="ml-3 btn-lg btn-primary col-3" formaction={% url 'contract:search_customer' %}>既存顧客<br>レンタル</button>
+        <button class="ml-3 btn-lg btn-primary col-3" formaction={% url 'contract:search_rental_for_new_rental' %}>既存顧客<br>レンタル</button>
         <button class="ml-3 btn-lg btn-primary col-3" >予約顧客<br>レンタル</button>
     </form>
 

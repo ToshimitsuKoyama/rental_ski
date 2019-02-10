@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView
 
 from contract.forms import ContractForm, CustomerForm, RentalInfoForm, NewRentalFormSet, CustomerSearchForm, \
-    RentalSearchForm, EditRentalFormSet, DetailCustomerForm
+    RentalSearchForm, EditRentalFormSet, CustomerReadOnlyForm
 from contract.models import CustomerInfo, RentalInfo, RentalMenuMaster,ContractInfo
 from django.views.generic.edit import FormView, CreateView, UpdateView, DeletionMixin
 from django.views.generic.list import ListView
@@ -64,13 +64,21 @@ class EditCustomerView(LoginRequiredMixin, UpdateView, DeletionMixin):
         return self.render_to_response(self.get_context_data(form=form, msg=success_msg))
 
 
-class DetailCustomerView(LoginRequiredMixin, UpdateView):
+class DetailCustomerForNewRentalView(LoginRequiredMixin, UpdateView):
     template_name = 'contract/detail_customer.html'
-    form_class = DetailCustomerForm
+    form_class = CustomerReadOnlyForm
 
     model = CustomerInfo
     slug_field = "customer_number"
     slug_url_kwarg = "customer_number"
+
+    NEW_CONTRACT_URL = 'contract:new_rental'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next_url'] = reverse(self.NEW_CONTRACT_URL, args=[self.kwargs.get(self.slug_url_kwarg)])
+
+        return context
 
 
 class NewRentalContractView(LoginRequiredMixin, FormView):
@@ -187,6 +195,10 @@ class CustomerSearchView(LoginRequiredMixin, ModelSearchViewBase):
         return reverse(cls.DETAIL_URL_NAME, args=[customer_number])
 
 
+class CustomerSearchForNewRentalView(CustomerSearchView):
+    DETAIL_URL_NAME = "contract:detail_customer"
+
+
 class RentalInfoSearchView(LoginRequiredMixin, ModelSearchViewBase):
 
     template_name = 'contract/search_rental.html'
@@ -196,6 +208,10 @@ class RentalInfoSearchView(LoginRequiredMixin, ModelSearchViewBase):
 
 class NewRentalTopView(LoginRequiredMixin, TemplateView):
     template_name = 'contract/new_rental_top.html'
+
+
+
+
 
 
 
